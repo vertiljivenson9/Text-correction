@@ -124,9 +124,6 @@
             font-weight: 600;
             color: #2c3e50;
             margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         
         .config-option {
@@ -277,34 +274,6 @@
             background: #a8a8a8;
         }
         
-        /* Estado de procesamiento */
-        .processing-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .processing-box {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            text-align: center;
-            max-width: 400px;
-        }
-        
-        .processing-text {
-            margin-top: 15px;
-            font-weight: 500;
-            color: #2c3e50;
-        }
-        
         @media (max-width: 1200px) {
             .main-content {
                 flex-direction: column;
@@ -333,19 +302,13 @@
                 min-width: 150px;
             }
         }
-        
-        @media (max-width: 768px) {
-            .config-group {
-                min-width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="main-header">
             <div class="main-title">Vertil Text Corrección Profesional</div>
-            <div class="app-subtitle">Herramienta avanzada de limpieza, validación y normalización de texto</div>
+            <div class="app-subtitle">Herramienta avanzada de limpieza y normalización de texto</div>
         </header>
         
         <div class="main-content">
@@ -358,53 +321,34 @@
             
             <div class="config-panel">
                 <div class="config-group">
-                    <div class="config-title">🛡️ Validación Avanzada</div>
+                    <div class="config-title">Validación Avanzada</div>
                     <div class="config-option">
                         <input type="checkbox" id="checkDuplicados" checked>
-                        <label for="checkDuplicados">Detectar caracteres duplicados ilegales</label>
+                        <label for="checkDuplicados">Corregir caracteres duplicados</label>
                     </div>
                     <div class="config-option">
                         <input type="checkbox" id="checkSecuencias" checked>
-                        <label for="checkSecuencias">Validar secuencias prohibidas</label>
+                        <label for="checkSecuencias">Corregir secuencias inválidas</label>
                     </div>
                     <div class="config-option">
-                        <input type="checkbox" id="checkJuridico" checked>
-                        <label for="checkJuridico">Validación de formato jurídico</label>
-                    </div>
-                    <div class="config-option">
-                        <input type="checkbox" id="checkEstructura" checked>
-                        <label for="checkEstructura">Corregir estructura de frases</label>
+                        <input type="checkbox" id="checkAcentos" checked>
+                        <label for="checkAcentos">Corregir acentos</label>
                     </div>
                 </div>
                 
                 <div class="config-group">
-                    <div class="config-title">🔧 Correcciones Específicas</div>
-                    <div class="config-option">
-                        <input type="checkbox" id="checkAcentos" checked>
-                        <label for="checkAcentos">Corregir acentos comunes</label>
-                    </div>
+                    <div class="config-title">Correcciones Específicas</div>
                     <div class="config-option">
                         <input type="checkbox" id="checkMayusculas" checked>
-                        <label for="checkMayusculas">Normalizar mayúsculas/minúsculas</label>
+                        <label for="checkMayusculas">Normalizar mayúsculas</label>
                     </div>
                     <div class="config-option">
                         <input type="checkbox" id="checkPuntuacion" checked>
-                        <label for="checkPuntuacion">Corregir puntuación avanzada</label>
+                        <label for="checkPuntuacion">Corregir puntuación</label>
                     </div>
                     <div class="config-option">
                         <input type="checkbox" id="checkEspacios" checked>
                         <label for="checkEspacios">Eliminar espacios innecesarios</label>
-                    </div>
-                </div>
-                
-                <div class="config-group">
-                    <div class="config-title">📊 Nivel de Validación</div>
-                    <div class="config-option">
-                        <select id="validationLevel">
-                            <option value="estricto">Estricto (Máxima corrección)</option>
-                            <option value="moderado" selected>Moderado (Balanceado)</option>
-                            <option value="basico">Básico (Solo errores graves)</option>
-                        </select>
                     </div>
                 </div>
             </div>
@@ -425,15 +369,8 @@
         </div>
         
         <footer>
-            <div>Vertil Text Corrección Profesional v2.0 | Procesamiento 100% local en tu navegador</div>
+            <div>Vertil Text Corrección Profesional v2.1 | Procesamiento 100% local en tu navegador</div>
         </footer>
-    </div>
-    
-    <!-- Overlay de procesamiento -->
-    <div class="processing-overlay" id="processingOverlay">
-        <div class="processing-box">
-            <div class="processing-text" id="processingText">Procesando texto...</div>
-        </div>
     </div>
 
     <script>
@@ -444,329 +381,151 @@
         const clearBtn = document.getElementById('clearBtn');
         const copyBtn = document.getElementById('copyBtn');
         const downloadBtn = document.getElementById('downloadBtn');
-        const processingOverlay = document.getElementById('processingOverlay');
-        const processingText = document.getElementById('processingText');
         
         // Elementos de configuración
         const checkDuplicados = document.getElementById('checkDuplicados');
         const checkSecuencias = document.getElementById('checkSecuencias');
-        const checkJuridico = document.getElementById('checkJuridico');
-        const checkEstructura = document.getElementById('checkEstructura');
         const checkAcentos = document.getElementById('checkAcentos');
         const checkMayusculas = document.getElementById('checkMayusculas');
         const checkPuntuacion = document.getElementById('checkPuntuacion');
         const checkEspacios = document.getElementById('checkEspacios');
-        const validationLevel = document.getElementById('validationLevel');
         
-        // ============================================
-        // DICCIONARIOS Y REGLAS AVANZADAS
-        // ============================================
-        
-        // SECUENCIAS PROHIBIDAS (no deben aparecer en texto formal)
-        const SECUENCIAS_PROHIBIDAS = [
-            /[0-9]{3,}/g, // Números de 3+ dígitos (excepto fechas, etc.)
-            /[a-zA-Z]{10,}/g, // Palabras extremadamente largas
-            /[!?¡¿]{3,}/g, // Múltiples signos de exclamación/interrogación
-            /\.{5,}/g // Múltiples puntos consecutivos
-        ];
-        
-        // CARACTERES DUPLICADOS ILEGALES (no deben duplicarse nunca)
-        const DUPLICADOS_ILEGALES = [
-            /,,/g, // Comas duplicadas
-            /;;/g, // Puntos y coma duplicados
-            /::/g, // Dos puntos duplicados
-            /\?\?/g, // Signos de interrogación duplicados
-            /!!/g, // Signos de exclamación duplicados
-            /  /g // Dos espacios seguidos (ya se maneja, pero por si acaso)
-        ];
-        
-        // ERRORES JURÍDICOS COMUNES (formato incorrecto en documentos formales)
-        const ERRORES_JURIDICOS = {
-            patrones: [
-                /artículo\s+[0-9]+/gi, // "artículo" sin mayúscula
-                /ley\s+[0-9]+\/[0-9]+/gi, // "ley" sin mayúscula
-                /d\.\s?e\./gi, // "d.e." en lugar de "D. E."
-                /\.\./g // Doble punto
-            ],
-            correcciones: {
-                'articulo': 'Artículo',
-                'ley': 'Ley',
-                'd.e.': 'D. E.',
-                'd. e.': 'D. E.',
-                'real decreto': 'Real Decreto',
-                'sentencia': 'Sentencia'
-            }
-        };
-        
-        // CORRECCIONES DE ACENTOS AMPLIADAS
-        const CORRECCIONES_ACENTOS = {
-            // Acentos comunes
-            'tambien': 'también',
-            'deberia': 'debería',
-            'linea': 'línea',
-            'puntuacion': 'puntuación',
-            'acentuacion': 'acentuación',
-            'español': 'español',
-            'profesional': 'profesional',
-            'herramienta': 'herramienta',
-            'texto': 'texto',
-            'correccion': 'corrección',
-            'validacion': 'validación',
-            'juridico': 'jurídico',
-            'tecnico': 'técnico',
-            // Palabras comúnmente mal escritas
-            'haber': 'haber',
-            'halla': 'haya',
-            'haya': 'haya',
-            'alla': 'allá',
-            'aya': 'aya',
-            'hecho': 'hecho',
-            'echo': 'echo',
-            'valla': 'vaya',
-            'baya': 'baya',
-            'callo': 'cayó',
-            'cayo': 'cayo',
-            'tubo': 'tuvo',
-            'tuvo': 'tuvo',
-            'hico': 'hizo',
-            'hizo': 'hizo'
-        };
-        
-        // SECUENCIAS QUE NO DEBEN ESCRIBIRSE JAMÁS
-        const SECUENCIAS_INVALIDAS = [
-            'qq', 'ww', 'xx', 'yy', 'zz', // Combinaciones poco comunes en español
-            'aa', 'ee', 'ii', 'oo', 'uu', // Vocales duplicadas (excepto en casos especiales)
-            'ae', 'ai', 'ao', 'au', 'ea', 'ei', 'eo', 'eu', 'ia', 'ie', 'io', 'iu', 'oa', 'oe', 'oi', 'ou', 'ua', 'ue', 'ui', 'uo' // Diptongos (no son inválidos, pero se marcan para revisión)
-        ];
-        
-        // ============================================
-        // FUNCIÓN PRINCIPAL DE LIMPIEZA PROFESIONAL
-        // ============================================
-        
+        // FUNCIÓN PRINCIPAL CORREGIDA
         function cleanTextProfessional(rawText, config) {
-            if (!rawText || rawText.trim() === '') {
-                return '';
-            }
+            if (!rawText || rawText.trim() === '') return '';
             
             let text = rawText;
             
-            // 1. ELIMINAR CARACTERES NO DESEADOS Y CONTROL
-            text = text.replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
-            
-            // 2. NORMALIZACIÓN BÁSICA
+            // 1. NORMALIZACIÓN BÁSICA
             text = text.replace(/\r\n/g, '\n');
             text = text.replace(/\r/g, '\n');
+            
+            // 2. ELIMINAR ESPACIOS DUPLICADOS (si está activado)
+            if (config.espacios) {
+                // Eliminar múltiples espacios entre palabras
+                text = text.replace(/[ \t]+/g, ' ');
+                // Eliminar espacios al inicio de línea
+                text = text.replace(/^[ \t]+/gm, '');
+                // Eliminar espacios al final de línea
+                text = text.replace(/[ \t]+$/gm, '');
+            }
+            
+            // 3. CORREGIR TABULACIONES (siempre activo, es básico)
             text = text.replace(/\t+/g, ' ');
             
-            // 3. ELIMINAR ESPACIOS DUPLICADOS (si está activado)
-            if (config.espacios) {
-                text = text.replace(/ +/g, ' ');
-                text = text.replace(/\n\s+/g, '\n');
-                text = text.replace(/\s+\n/g, '\n');
-            }
-            
-            // 4. UNIFICAR COMILLAS Y CARACTERES ESPECIALES
+            // 4. UNIFICAR COMILLAS
             text = text.replace(/[«»"“”]/g, '"');
             text = text.replace(/[‘’]/g, "'");
-            text = text.replace(/[–—]/g, '-');
-            text = text.replace(/…/g, '...');
             
-            // 5. VALIDACIÓN DE DUPLICADOS ILEGALES (si está activado)
+            // 5. CORREGIR PUNTUACIÓN DUPLICADA (si está activado)
             if (config.duplicados) {
-                DUPLICADOS_ILEGALES.forEach(pattern => {
-                    text = text.replace(pattern, match => match.charAt(0));
-                });
-            }
-            
-            // 6. DETECCIÓN DE SECUENCIAS PROHIBIDAS (si está activado)
-            if (config.secuencias) {
-                SECUENCIAS_PROHIBIDAS.forEach(pattern => {
-                    text = text.replace(pattern, '[SECUENCIA NO PERMITIDA]');
-                });
-                
-                // Detectar secuencias inválidas específicas
-                SECUENCIAS_INVALIDAS.forEach(seq => {
-                    const regex = new RegExp(seq, 'gi');
-                    text = text.replace(regex, `[SECUENCIA "${seq.toUpperCase()}"]`);
-                });
-            }
-            
-            // 7. VALIDACIÓN JURÍDICA (si está activado)
-            if (config.juridico) {
-                // Corregir errores comunes en documentos jurídicos
-                Object.keys(ERRORES_JURIDICOS.correcciones).forEach(error => {
-                    const regex = new RegExp(`\\b${error}\\b`, 'gi');
-                    text = text.replace(regex, ERRORES_JURIDICOS.correcciones[error]);
-                });
-                
-                // Aplicar patrones de formato jurídico
-                ERRORES_JURIDICOS.patrones.forEach(pattern => {
-                    text = text.replace(pattern, match => {
-                        // Capitalizar palabras importantes
-                        return match.replace(/\b\w/g, char => char.toUpperCase());
-                    });
-                });
-            }
-            
-            // 8. CORRECCIÓN DE ACENTOS (si está activado)
-            if (config.acentos) {
-                Object.keys(CORRECCIONES_ACENTOS).forEach(palabra => {
-                    const regex = new RegExp(`\\b${palabra}\\b`, 'gi');
-                    text = text.replace(regex, CORRECCIONES_ACENTOS[palabra]);
-                });
-            }
-            
-            // 9. CORRECCIÓN DE PUNTUACIÓN AVANZADA (si está activado)
-            if (config.puntuacion) {
-                // Normalizar puntuación repetida
+                text = text.replace(/,{2,}/g, ',');
                 text = text.replace(/\.{4,}/g, '...');
                 text = text.replace(/\.{2,3}/g, '.');
-                text = text.replace(/,{2,}/g, ',');
                 text = text.replace(/!{2,}/g, '!');
                 text = text.replace(/\?{2,}/g, '?');
                 text = text.replace(/;{2,}/g, ';');
                 text = text.replace(/:{2,}/g, ':');
-                
-                // Corregir combinaciones incorrectas
-                text = text.replace(/\.(?=[,;:!?])/g, '');
-                text = text.replace(/,(\s*[,;:!?.])/g, '$1');
-                text = text.replace(/([!?])(\s*)\1+/g, '$1');
-                
-                // Espacios alrededor de puntuación
-                text = text.replace(/\s+([.,;:!?])/g, '$1');
-                text = text.replace(/([.,;:])\s*/g, '$1 ');
-                text = text.replace(/([.!?])\s+/g, '$1 ');
             }
             
-            // 10. CORRECCIÓN DE ESTRUCTURA DE FRASES (si está activado)
-            if (config.estructura) {
-                // Dividir en oraciones para análisis estructural
-                const oraciones = text.split(/([.!?]\s+)/);
-                let resultadoEstructura = '';
+            // 6. CORREGIR SIGNOS DE PUNTUACIÓN MAL COLOCADOS (si está activado)
+            if (config.puntuacion) {
+                // Eliminar espacio antes de signos de puntuación
+                text = text.replace(/\s+([.,;:!?])/g, '$1');
+                // Añadir espacio después de coma, punto y coma, dos puntos
+                text = text.replace(/([,;:])(?!\s)/g, '$1 ');
+                // Añadir espacio después de punto solo si no es abreviatura
+                text = text.replace(/\.(?=[A-ZÁÉÍÓÚ])/g, '. ');
+                // Corregir múltiples signos seguidos
+                text = text.replace(/([.,])([.,]+)/g, '$1');
+            }
+            
+            // 7. CORREGIR ACENTOS (si está activado) - VERSIÓN SIMPLIFICADA Y SEGURA
+            if (config.acentos) {
+                const accentCorrections = {
+                    'tambien': 'también',
+                    'deberia': 'debería',
+                    'linea': 'línea',
+                    'puntuacion': 'puntuación',
+                    'acentuacion': 'acentuación',
+                    'correccion': 'corrección',
+                    'validacion': 'validación',
+                    'juridico': 'jurídico',
+                    'tecnico': 'técnico',
+                    'automatico': 'automático'
+                };
                 
-                for (let i = 0; i < oraciones.length; i++) {
-                    let oracion = oraciones[i];
+                Object.keys(accentCorrections).forEach(word => {
+                    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                    text = text.replace(regex, accentCorrections[word]);
+                });
+            }
+            
+            // 8. NORMALIZAR MAYÚSCULAS (si está activado)
+            if (config.mayusculas) {
+                // Primero, marcar las siglas para preservarlas
+                text = text.replace(/\b([A-Z]{2,})\b/g, '{{SIGLA:$1}}');
+                
+                // Convertir todo a minúsculas (excepto lo marcado)
+                text = text.toLowerCase();
+                
+                // Restaurar las siglas
+                text = text.replace(/\{\{SIGLA:([A-Z]{2,})\}\}/g, '$1');
+                
+                // Capitalizar primera letra de cada oración
+                const sentences = text.split(/([.!?]\s+)/);
+                let result = '';
+                
+                for (let i = 0; i < sentences.length; i++) {
+                    let sentence = sentences[i];
                     
-                    if (oracion.length > 0) {
-                        // Detectar si es signo de puntuación con espacio
-                        if (/^[.!?]\s+$/.test(oracion)) {
-                            resultadoEstructura += oracion;
+                    if (sentence.length > 0) {
+                        if (/^[.!?]\s+$/.test(sentence)) {
+                            result += sentence;
                             continue;
                         }
                         
-                        // Aplicar nivel de validación
-                        if (config.nivel === 'estricto') {
-                            // Validación estricta: corregir todo
-                            oracion = corregirEstructuraEstricta(oracion);
-                        } else if (config.nivel === 'moderado') {
-                            // Validación moderada: corregir solo errores graves
-                            oracion = corregirEstructuraModerada(oracion);
+                        // Capitalizar primera letra de la oración
+                        if (i === 0 || (i > 0 && /[.!?]\s+$/.test(sentences[i-1]))) {
+                            sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
                         }
-                        // Básico: no hacer correcciones estructurales
                         
-                        resultadoEstructura += oracion;
+                        result += sentence;
                     }
                 }
                 
-                text = resultadoEstructura;
+                text = result;
             }
             
-            // 11. NORMALIZACIÓN DE MAYÚSCULAS (si está activado)
-            if (config.mayusculas) {
-                text = normalizarMayusculas(text, config.nivel);
+            // 9. ELIMINAR SECUENCIAS REALMENTE INVÁLIDAS (si está activado)
+            if (config.secuencias) {
+                // Solo secuencias que realmente son inválidas en español
+                const invalidSequences = [
+                    { pattern: /qq/g, replace: 'q' },
+                    { pattern: /ww/g, replace: 'w' },
+                    { pattern: /xx/g, replace: 'x' },
+                    { pattern: /yy/g, replace: 'y' },
+                    { pattern: /zz/g, replace: 'z' },
+                    // Eliminar espacios múltiples (por si acaso)
+                    { pattern: / {2,}/g, replace: ' ' }
+                ];
+                
+                invalidSequences.forEach(seq => {
+                    text = text.replace(seq.pattern, seq.replace);
+                });
             }
             
-            // 12. ELIMINAR LÍNEAS VACÍAS REPETIDAS
-            text = text.replace(/\n\s*\n\s*\n+/g, '\n\n');
+            // 10. LIMPIAR SALTOS DE LÍNEA REPETIDOS
+            text = text.replace(/\n{3,}/g, '\n\n');
             
-            // 13. LIMPIAR ESPACIOS FINALES
-            text = text.replace(/\s+$/gm, '');
-            text = text.replace(/^\s+/gm, '');
-            text = text.replace(/\n+$/, '');
+            // 11. ELIMINAR ESPACIOS AL INICIO Y FINAL
+            text = text.trim();
+            
+            // 12. ELIMINAR ESPACIOS AL FINAL DE CADA LÍNEA
+            text = text.replace(/[ \t]+$/gm, '');
             
             return text;
         }
-        
-        // ============================================
-        // FUNCIONES AUXILIARES ESPECIALIZADAS
-        // ============================================
-        
-        function corregirEstructuraEstricta(oracion) {
-            // 1. Eliminar palabras repetidas consecutivas
-            oracion = oracion.replace(/\b(\w+)\s+\1\b/gi, '$1');
-            
-            // 2. Corregir secuencias de preposiciones incorrectas
-            const preposicionesIncorrectas = [
-                ['de el', 'del'],
-                ['a el', 'al'],
-                ['de las', 'de las'], // No cambia, pero se valida
-                ['de los', 'de los']  // No cambia, pero se valida
-            ];
-            
-            preposicionesIncorrectas.forEach(([incorrecta, correcta]) => {
-                const regex = new RegExp(`\\b${incorrecta}\\b`, 'gi');
-                oracion = oracion.replace(regex, correcta);
-            });
-            
-            // 3. Validar concordancia básica (singular/plural simple)
-            // Esto es muy básico, para una versión más avanzada se necesitaría NLP
-            
-            return oracion;
-        }
-        
-        function corregirEstructuraModerada(oracion) {
-            // Solo corrige los errores más evidentes
-            // 1. Palabras obviamente repetidas (misma palabra dos veces seguidas)
-            oracion = oracion.replace(/\b(\w+)\s+\1\b/gi, (match, palabra) => {
-                // No corregir si son palabras cortas que pueden repetirse (como "no")
-                if (palabra.length <= 2) return match;
-                return palabra;
-            });
-            
-            return oracion;
-        }
-        
-        function normalizarMayusculas(texto, nivel) {
-            // Aplicar normalización según el nivel de validación
-            
-            if (nivel === 'estricto') {
-                // Modo estricto: aplicar reglas completas de mayúsculas
-                let oraciones = texto.split(/([.!?]\s+)/);
-                let resultado = '';
-                
-                for (let i = 0; i < oraciones.length; i++) {
-                    let oracion = oraciones[i];
-                    
-                    if (oracion.length > 0) {
-                        if (/^[.!?]\s+$/.test(oracion)) {
-                            resultado += oracion;
-                            continue;
-                        }
-                        
-                        if (i === 0 || (i > 0 && /[.!?]\s+$/.test(oraciones[i-1]))) {
-                            // Capitalizar primera letra de la oración
-                            oracion = oracion.charAt(0).toUpperCase() + oracion.slice(1);
-                        } else {
-                            // Preservar siglas y acrónimos
-                            oracion = oracion.replace(/\b([A-ZÁÉÍÓÚÑ]{2,})\b/g, '{{SIGLA:$1}}');
-                            oracion = oracion.toLowerCase();
-                            oracion = oracion.replace(/\{\{SIGLA:([A-ZÁÉÍÓÚÑ]{2,})\}\}/g, '$1');
-                        }
-                        
-                        resultado += oracion;
-                    }
-                }
-                
-                return resultado;
-            } else {
-                // Modo moderado o básico: solo capitalizar después de punto
-                return texto.replace(/(?:^|\.\s+)([a-záéíóúñ])/g, match => match.toUpperCase());
-            }
-        }
-        
-        // ============================================
-        // MANEJADORES DE EVENTOS
-        // ============================================
         
         // Evento para procesar texto
         processBtn.addEventListener('click', function() {
@@ -779,47 +538,27 @@
                 return;
             }
             
-            // Mostrar overlay de procesamiento
-            processingOverlay.style.display = 'flex';
-            processingText.textContent = 'Validando y corrigiendo texto...';
-            
-            // Obtener configuración actual
+            // Obtener configuración
             const config = {
                 duplicados: checkDuplicados.checked,
                 secuencias: checkSecuencias.checked,
-                juridico: checkJuridico.checked,
-                estructura: checkEstructura.checked,
                 acentos: checkAcentos.checked,
                 mayusculas: checkMayusculas.checked,
                 puntuacion: checkPuntuacion.checked,
-                espacios: checkEspacios.checked,
-                nivel: validationLevel.value
+                espacios: checkEspacios.checked
             };
             
-            // Usar setTimeout para no bloquear la interfaz
-            setTimeout(() => {
-                try {
-                    const cleanedText = cleanTextProfessional(rawText, config);
-                    outputText.value = cleanedText;
-                    
-                    // Habilitar botones si hay texto limpio
-                    if (cleanedText.trim() !== '') {
-                        copyBtn.disabled = false;
-                        downloadBtn.disabled = false;
-                    } else {
-                        copyBtn.disabled = true;
-                        downloadBtn.disabled = true;
-                    }
-                    
-                    // Ocultar overlay
-                    processingOverlay.style.display = 'none';
-                    
-                } catch (error) {
-                    console.error('Error en el procesamiento:', error);
-                    outputText.value = 'Error durante el procesamiento. Por favor, revisa la consola para más detalles.';
-                    processingOverlay.style.display = 'none';
-                }
-            }, 100);
+            const cleanedText = cleanTextProfessional(rawText, config);
+            outputText.value = cleanedText;
+            
+            // Habilitar botones si hay texto limpio
+            if (cleanedText.trim() !== '') {
+                copyBtn.disabled = false;
+                downloadBtn.disabled = false;
+            } else {
+                copyBtn.disabled = true;
+                downloadBtn.disabled = true;
+            }
         });
         
         // Evento para copiar texto
@@ -839,7 +578,6 @@
                 })
                 .catch(err => {
                     console.error('Error al copiar:', err);
-                    // Fallback para navegadores antiguos
                     const textArea = document.createElement('textarea');
                     textArea.value = outputText.value;
                     document.body.appendChild(textArea);
@@ -880,7 +618,6 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            // Feedback visual
             const originalText = downloadBtn.textContent;
             downloadBtn.textContent = '¡Descargado!';
             downloadBtn.style.backgroundColor = '#1c6ea4';
@@ -891,7 +628,7 @@
             }, 2000);
         });
         
-        // Procesar automáticamente cuando el usuario escribe (con retardo)
+        // Procesar automáticamente cuando el usuario escribe
         let typingTimer;
         inputText.addEventListener('input', function() {
             clearTimeout(typingTimer);
@@ -900,14 +637,29 @@
                 if (inputText.value.trim() !== '') {
                     processBtn.click();
                 }
-            }, 1000); // 1 segundo de retardo para no sobrecargar
+            }, 800);
         });
         
-        // Configurar evento para cerrar overlay si hay error
-        processingOverlay.addEventListener('click', function(e) {
-            if (e.target === processingOverlay) {
-                processingOverlay.style.display = 'none';
-            }
+        // Cargar el texto de ejemplo para prueba
+        window.addEventListener('load', function() {
+            const exampleText = `    ESTE   es   un   texto    mal    formado,,,   con   MUCHOS   problemas!!!
+
+Tiene   espacios    dobles   y     triples,
+saltos   de   linea   innecesarios,
+
+
+comillas “raras”  y  'mal  usadas'    ,
+ signos   de   puntuacion  mal colocados ,,, y frases
+cortadas   sin    sentido.
+
+	Tambien		tiene		tabulaCIONES		extrañas
+y   palabras   con    MAYUSCULAS   INCONSISTENTES.
+
+Este texto     deberia   quedar   limpio,   legible
+y listo   para   usar   sin   cambiar   su   significado.`;
+            
+            inputText.value = exampleText;
+            processBtn.click();
         });
     </script>
 </body>
