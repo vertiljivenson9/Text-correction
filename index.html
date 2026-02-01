@@ -282,110 +282,175 @@
         const copyBtn = document.getElementById('copyBtn');
         const downloadBtn = document.getElementById('downloadBtn');
         
-        // Función principal de limpieza de texto
+        // Función principal de limpieza de texto (VERSIÓN CORREGIDA)
         function cleanTextAdvanced(rawText) {
-    if (!rawText || rawText.trim() === '') {
-        return '';
-    }
-    
-    let text = rawText;
-    
-    // 1. Convertir tabulaciones a espacios
-    text = text.replace(/\t+/g, ' ');
-    
-    // 2. Normalizar saltos de línea
-    text = text.replace(/\r\n/g, '\n');
-    text = text.replace(/\r/g, '\n');
-    
-    // 3. Unificar comillas tipográficas
-    text = text.replace(/[«»"“”]/g, '"');
-    text = text.replace(/[‘’]/g, "'");
-    
-    // 4. Eliminar espacios duplicados y normalizar espacios alrededor de puntuación
-    text = text.replace(/ +/g, ' ');
-    text = text.replace(/\n\s+/g, '\n');
-    text = text.replace(/\s+\n/g, '\n');
-    
-    // 5. Normalizar puntuación repetida
-    text = text.replace(/\.{4,}/g, '...');
-    text = text.replace(/\.{2,3}/g, '.');
-    text = text.replace(/,{2,}/g, ',');
-    text = text.replace(/!{2,}/g, '!');
-    text = text.replace(/\?{2,}/g, '?');
-    text = text.replace(/;{2,}/g, ';');
-    text = text.replace(/:{2,}/g, ':');
-    
-    // 6. Corregir espacios alrededor de puntuación
-    text = text.replace(/\s+([.,;:!?])/g, '$1');
-    text = text.replace(/([.,;:])\s*/g, '$1 ');
-    text = text.replace(/([.!?])\s+/g, '$1 ');
-    
-    // 7. Eliminar líneas vacías repetidas (máximo 2 seguidas)
-    text = text.replace(/\n\s*\n\s*\n+/g, '\n\n');
-    
-    // 8. Normalizar acentos comunes del español
-    const accentMap = {
-        'tambien': 'también',
-        'deberia': 'debería',
-        'linea': 'línea',
-        'puntuacion': 'punctuación',
-        'texto': 'texto',
-        'herramienta': 'herramienta',
-        'profesional': 'profesional',
-        'español': 'español',
-        'acentuacion': 'acentuación'
-    };
-    
-    // Solo aplicar a palabras completas
-    Object.keys(accentMap).forEach(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-        text = text.replace(regex, accentMap[word]);
-    });
-    
-    // 9. Aplicar modo frase estándar (mayúsculas después de punto)
-    text = text.trim();
-    
-    // Dividir en oraciones
-    let sentences = text.split(/([.!?]\s+)/);
-    let result = '';
-    
-    for (let i = 0; i < sentences.length; i++) {
-        let sentence = sentences[i];
-        
-        if (sentence.length > 0) {
-            // Detectar si es signo de puntuación con espacio
-            if (/^[.!?]\s+$/.test(sentence)) {
-                result += sentence;
-                continue;
+            if (!rawText || rawText.trim() === '') {
+                return '';
             }
             
-            // Detectar si la siguiente parte es una oración nueva
-            if (i === 0 || (i > 0 && /[.!?]\s+$/.test(sentences[i-1]))) {
-                // Capitalizar primera letra
-                sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-            } else {
-                // Convertir a minúsculas (excepto siglas)
-                // Preservar palabras que parecen siglas (todas mayúsculas)
-                sentence = sentence.replace(/\b([A-ZÁÉÍÓÚÑ]{2,})\b/g, '{{SIGLA:$1}}');
-                sentence = sentence.toLowerCase();
-                sentence = sentence.replace(/\{\{SIGLA:([A-ZÁÉÍÓÚÑ]{2,})\}\}/g, '$1');
+            let text = rawText;
+            
+            // 1. Convertir tabulaciones a espacios
+            text = text.replace(/\t+/g, ' ');
+            
+            // 2. Normalizar saltos de línea
+            text = text.replace(/\r\n/g, '\n');
+            text = text.replace(/\r/g, '\n');
+            
+            // 3. Unificar comillas tipográficas
+            text = text.replace(/[«»"“”]/g, '"');
+            text = text.replace(/[‘’]/g, "'");
+            
+            // 4. Eliminar espacios duplicados y normalizar espacios alrededor de puntuación
+            text = text.replace(/ +/g, ' ');
+            text = text.replace(/\n\s+/g, '\n');
+            text = text.replace(/\s+\n/g, '\n');
+            
+            // 5. Normalizar puntuación repetida
+            text = text.replace(/\.{4,}/g, '...');
+            text = text.replace(/\.{2,3}/g, '.');
+            text = text.replace(/,{2,}/g, ',');
+            text = text.replace(/!{2,}/g, '!');
+            text = text.replace(/\?{2,}/g, '?');
+            text = text.replace(/;{2,}/g, ';');
+            text = text.replace(/:{2,}/g, ':');
+            
+            // 6. Corregir espacios alrededor de puntuación
+            text = text.replace(/\s+([.,;:!?])/g, '$1');
+            text = text.replace(/([.,;:])\s*/g, '$1 ');
+            text = text.replace(/([.!?])\s+/g, '$1 ');
+            
+            // 7. Eliminar líneas vacías repetidas (máximo 2 seguidas)
+            text = text.replace(/\n\s*\n\s*\n+/g, '\n\n');
+            
+            // 8. Normalizar acentos comunes del español (CORREGIDO)
+            const accentMap = {
+                'tambien': 'también',
+                'deberia': 'debería',
+                'linea': 'línea',
+                'puntuacion': 'puntuación', // CORRECCIÓN: era "punctuación"
+                'texto': 'texto',
+                'herramienta': 'herramienta',
+                'profesional': 'profesional',
+                'español': 'español',
+                'acentuacion': 'acentuación'
+            };
+            
+            // Solo aplicar a palabras completas
+            Object.keys(accentMap).forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                text = text.replace(regex, accentMap[word]);
+            });
+            
+            // 9. Aplicar modo frase estándar (mayúsculas después de punto)
+            text = text.trim();
+            
+            // Dividir en oraciones
+            let sentences = text.split(/([.!?]\s+)/);
+            let result = '';
+            
+            for (let i = 0; i < sentences.length; i++) {
+                let sentence = sentences[i];
+                
+                if (sentence.length > 0) {
+                    // Detectar si es signo de puntuación con espacio
+                    if (/^[.!?]\s+$/.test(sentence)) {
+                        result += sentence;
+                        continue;
+                    }
+                    
+                    // Detectar si la siguiente parte es una oración nueva
+                    if (i === 0 || (i > 0 && /[.!?]\s+$/.test(sentences[i-1]))) {
+                        // Capitalizar primera letra
+                        sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+                    } else {
+                        // Convertir a minúsculas (excepto siglas)
+                        // Preservar palabras que parecen siglas (todas mayúsculas)
+                        sentence = sentence.replace(/\b([A-ZÁÉÍÓÚÑ]{2,})\b/g, '{{SIGLA:$1}}');
+                        sentence = sentence.toLowerCase();
+                        sentence = sentence.replace(/\{\{SIGLA:([A-ZÁÉÍÓÚÑ]{2,})\}\}/g, '$1');
+                    }
+                    
+                    result += sentence;
+                }
             }
             
-            result += sentence;
+            text = result;
+            
+            // 10. Limpiar espacios finales
+            text = text.replace(/\s+$/gm, '');
+            text = text.replace(/^\s+/gm, '');
+            
+            // 11. Normalizar múltiples saltos de línea finales
+            text = text.replace(/\n+$/, '');
+            
+            return text;
         }
-    }
-    
-    text = result;
-    
-    // 10. Limpiar espacios finales
-    text = text.replace(/\s+$/gm, '');
-    text = text.replace(/^\s+/gm, '');
-    
-    // 11. Normalizar múltiples saltos de línea finales
-    text = text.replace(/\n+$/, '');
-    
-    return text;
-}
+        
+        // Evento para procesar texto (FALTANTE EN EL CÓDIGO ANTERIOR)
+        processBtn.addEventListener('click', function() {
+            const rawText = inputText.value;
+            
+            if (!rawText || rawText.trim() === '') {
+                outputText.value = '';
+                copyBtn.disabled = true;
+                downloadBtn.disabled = true;
+                return;
+            }
+            
+            const cleanedText = cleanTextAdvanced(rawText);
+            outputText.value = cleanedText;
+            
+            // Habilitar botones si hay texto limpio
+            if (cleanedText.trim() !== '') {
+                copyBtn.disabled = false;
+                downloadBtn.disabled = false;
+            } else {
+                copyBtn.disabled = true;
+                downloadBtn.disabled = true;
+            }
+        });
+        
+        // Evento para copiar texto (FALTANTE EN EL CÓDIGO ANTERIOR)
+        copyBtn.addEventListener('click', function() {
+            if (!outputText.value.trim()) return;
+            
+            navigator.clipboard.writeText(outputText.value)
+                .then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '¡Copiado!';
+                    copyBtn.style.backgroundColor = '#1b5e20';
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.backgroundColor = '';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Error al copiar:', err);
+                    // Fallback para navegadores antiguos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = outputText.value;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '¡Copiado!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
+                });
+        });
+        
+        // Evento para limpiar todo (FALTANTE EN EL CÓDIGO ANTERIOR)
+        clearBtn.addEventListener('click', function() {
+            inputText.value = '';
+            outputText.value = '';
+            copyBtn.disabled = true;
+            downloadBtn.disabled = true;
+        });
         
         // Evento para descargar texto
         downloadBtn.addEventListener('click', function() {
